@@ -1,0 +1,25 @@
+package org.hglteam.validation;
+
+import java.util.function.Function;
+
+public class ValidationException extends IllegalArgumentException {
+
+    public ValidationException() {
+    }
+
+    public ValidationException(String s) {
+        super(s);
+    }
+
+    public ValidationException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public ValidationException(Throwable cause) {
+        super(cause);
+    }
+
+    public static <TX> Function<TX, ValidationException> withMessage(String message, Object... args) {
+        return t -> new ValidationException(String.format(message, args));
+    }
+}
