@@ -3,6 +3,7 @@ package org.hglteam.validation;
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
 
+import javax.validation.ValidationException;
 import java.util.function.Function;
 import java.util.function.Predicate;
 

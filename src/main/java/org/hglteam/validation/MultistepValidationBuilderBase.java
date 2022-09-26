@@ -1,5 +1,6 @@
 package org.hglteam.validation;
 
+import javax.validation.ValidationException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
