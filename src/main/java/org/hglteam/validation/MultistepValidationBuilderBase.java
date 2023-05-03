@@ -1,6 +1,5 @@
 package org.hglteam.validation;
 
-import javax.validation.ValidationException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -53,7 +52,7 @@ public abstract class MultistepValidationBuilderBase<T, B extends MultistepValid
             return this;
         }
 
-        public B then(Function<T, ValidationException> exceptionFunction) {
+        public B then(Function<T, ? extends RuntimeException> exceptionFunction) {
             MultistepValidationBuilderBase.this
                     .validations
                     .add(SimpleValidation.<T>builder()
