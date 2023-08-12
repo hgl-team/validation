@@ -3,7 +3,6 @@ package org.hglteam.validation;
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
 
-import javax.validation.ValidationException;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -11,7 +10,7 @@ import java.util.function.Predicate;
 @SuperBuilder(toBuilder = true)
 public class SimpleValidation<T> implements Validation<T> {
     private final Predicate<T> predicate;
-    private final Function<T, ValidationException> exceptionFunction;
+    private final Function<T, ? extends RuntimeException> exceptionFunction;
 
     @Override
     public void validate(T target) {

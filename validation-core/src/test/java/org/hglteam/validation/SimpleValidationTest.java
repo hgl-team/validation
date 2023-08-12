@@ -2,7 +2,6 @@ package org.hglteam.validation;
 
 import org.junit.jupiter.api.Test;
 
-import javax.validation.ValidationException;
 import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -13,7 +12,7 @@ class SimpleValidationTest {
     void validationPass() {
         var validation = SimpleValidation.builder()
                 .predicate(Objects::nonNull)
-                .exceptionFunction(ValidationError.withMessage("Should pass!!"))
+                .exceptionFunction(ValidationError.withMessage(RuntimeException::new, "Should pass!!"))
                 .build();
 
         assertDoesNotThrow(() -> validation.validate(null));
@@ -23,17 +22,17 @@ class SimpleValidationTest {
     void validationError() {
         var validation = SimpleValidation.builder()
                 .predicate(Objects::isNull)
-                .exceptionFunction(ValidationError.withMessage("Should not pass!!"))
+                .exceptionFunction(ValidationError.withMessage(RuntimeException::new, "Should not pass!!"))
                 .build();
 
-        assertThrows(ValidationException.class, () -> validation.validate(null));
+        assertThrows(RuntimeException.class, () -> validation.validate(null));
     }
 
     @Test
     void validationPassUsingValidMethod() {
         var validation = SimpleValidation.<Integer>builder()
                 .predicate(Objects::isNull)
-                .exceptionFunction(ValidationError.withMessage("Should pass!!"))
+                .exceptionFunction(ValidationError.withMessage(RuntimeException::new, "Should pass!!"))
                 .build();
 
         assertDoesNotThrow(() -> {
@@ -46,9 +45,9 @@ class SimpleValidationTest {
     void validationErrorUsingValidMethod() {
         var validation = SimpleValidation.builder()
                 .predicate(Objects::isNull)
-                .exceptionFunction(ValidationError.withMessage("Should not pass!!"))
+                .exceptionFunction(ValidationError.withMessage(RuntimeException::new, "Should not pass!!"))
                 .build();
 
-        assertThrows(ValidationException.class, () -> validation.valid(null));
+        assertThrows(RuntimeException.class, () -> validation.valid(null));
     }
 }

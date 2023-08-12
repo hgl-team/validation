@@ -5,8 +5,6 @@ import lombok.experimental.SuperBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import javax.validation.ValidationException;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class MultistepValidationBuilderTest {
@@ -29,15 +27,19 @@ class MultistepValidationBuilderTest {
     void oneValidationWithSimpleCondition() {
         var validation1 = Validation.<Book>builder()
                 .when(b -> b.year != 1967)
-                .then(ValidationError.withMessage("wrong!", book.year));
+                .then(ValidationError.using(RuntimeException::new)
+                        .message("wrong! {0}")
+                        .andArguments(book.year));
 
         assertDoesNotThrow(() -> validation1.validate(book));
 
         var validation2 = Validation.<Book>builder()
                 .when(b -> b.year == 1967)
-                .then(ValidationError.withMessage("good!", book.year));
+                .then(ValidationError.using(RuntimeException::new)
+                        .message("good!")
+                        .andNoArguments());
 
-        assertThrows(ValidationException.class, () -> validation2.validate(book));
+        assertThrows(RuntimeException.class, () -> validation2.validate(book));
     }
 
     @Test
@@ -45,16 +47,16 @@ class MultistepValidationBuilderTest {
         var validation1 = Validation.<Book>builder()
                 .when(b -> b.year != 1967)
                 .and(b -> !b.getName().contains("soledad"))
-                .then(ValidationError.withMessage("wrong!", book.year));
+                .then(ValidationError.withMessage(RuntimeException::new,"wrong!", book.year));
 
         assertDoesNotThrow(() -> validation1.validate(book));
 
         var validation2 = Validation.<Book>builder()
                 .when(b -> b.year == 1967)
                 .and(b -> b.getName().contains("soledad"))
-                .then(ValidationError.withMessage("good!", book.year));
+                .then(ValidationError.withMessage(RuntimeException::new,"good!", book.year));
 
-        assertThrows(ValidationException.class, () -> validation2.validate(book));
+        assertThrows(RuntimeException.class, () -> validation2.validate(book));
     }
 
     @Test
@@ -62,60 +64,60 @@ class MultistepValidationBuilderTest {
         var validation1 = Validation.<Book>builder()
                 .when(b -> b.year != 1967)
                 .or(b -> !b.getName().contains("soledad"))
-                .then(ValidationError.withMessage("wrong!", book.year));
+                .then(ValidationError.withMessage(RuntimeException::new, "wrong!", book.year));
 
         assertDoesNotThrow(() -> validation1.validate(book));
 
         var validation2 = Validation.<Book>builder()
                 .when(b -> b.year != 1967)
                 .or(b -> b.getName().contains("soledad"))
-                .then(ValidationError.withMessage("good!", book.year));
+                .then(ValidationError.withMessage(RuntimeException::new,"good!", book.year));
 
-        assertThrows(ValidationException.class, () -> validation2.validate(book));
+        assertThrows(RuntimeException.class, () -> validation2.validate(book));
     }
 
     @Test
     void twoValidationWithSingleConditions() {
         var validation1 = Validation.<Book>builder()
                 .when(b -> b.year != 1967)
-                .then(ValidationError.withMessage("wrong! %d", book.year))
+                .then(ValidationError.withMessage(RuntimeException::new,"wrong! %d", book.year))
                 .when(b -> !b.getName().contains("soledad"))
-                .then(ValidationError.withMessage("wrong! %s", book.name));
+                .then(ValidationError.withMessage(RuntimeException::new,"wrong! %s", book.name));
 
         assertDoesNotThrow(() -> validation1.validate(book));
 
         var validation2 = Validation.<Book>builder()
                 .when(b -> b.year != 1967)
-                .then(ValidationError.withMessage("wrong! %d", book.year))
+                .then(ValidationError.withMessage(RuntimeException::new,"wrong! %d", book.year))
                 .when(b -> b.getName().contains("soledad"))
-                .then(ValidationError.withMessage("good!", book.name));
+                .then(ValidationError.withMessage(RuntimeException::new,"good!", book.name));
 
-        assertThrows(ValidationException.class, () -> validation2.validate(book), "good!");
+        assertThrows(RuntimeException.class, () -> validation2.validate(book), "good!");
     }
 
     @Test
     void threeValidationOneOverProperty() {
         var validation1 = Validation.<Book>builder()
                 .when(b -> b.year != 1967)
-                .then(ValidationError.withMessage("wrong year!"))
+                .then(ValidationError.withMessage(RuntimeException::new, "wrong year!"))
                 .onProperty(Book::getAuthor, builder -> builder
                         .when(b -> !b.getName().contains("Garcia"))
-                        .then(ValidationError.withMessage("wrong author name!")))
+                        .then(ValidationError.withMessage(RuntimeException::new, "wrong author name!")))
                 .when(b -> !b.name.contains("soledad"))
-                .then(ValidationError.withMessage("wrong book name!"));
+                .then(ValidationError.withMessage(RuntimeException::new, "wrong book name!"));
 
         assertDoesNotThrow(() -> validation1.validate(book));
 
         var validation2 = Validation.<Book>builder()
                 .when(b -> b.year != 1967)
-                .then(ValidationError.withMessage("wrong year!"))
+                .then(ValidationError.withMessage(RuntimeException::new, "wrong year!"))
                 .onProperty(Book::getAuthor, builder -> builder
                         .when(b -> b.getName().contains("Garcia"))
-                        .then(ValidationError.withMessage("good!")))
+                        .then(ValidationError.from(RuntimeException::new)))
                 .when(b -> b.name.contains("soledad"))
-                .then(ValidationError.withMessage("wrong book name!"));
+                .then(ValidationError.withMessage(RuntimeException::new, "wrong book name!"));
 
-        assertThrows(ValidationException.class, () -> validation2.validate(book), "good!");
+        assertThrows(RuntimeException.class, () -> validation2.validate(book));
     }
 
     @Getter
