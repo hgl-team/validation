@@ -17,6 +17,11 @@ public abstract class MultistepValidationBuilderBase<T, B extends MultistepValid
         return new ValidationStepBuilder(predicate);
     }
 
+    public B thenCheck(Validation<T> other) {
+        validations.add(other);
+        return self();
+    }
+
     public <P> B onProperty(Function<T, P> getter, Consumer<MultistepValidationBuilderBase<P, ?>> builderConfigurator) {
         this.validations.add(this.propertyValidator(getter, builderConfigurator));
         return self();
