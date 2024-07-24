@@ -5,6 +5,8 @@ import lombok.experimental.SuperBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.text.MessageFormat;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class MultistepValidationBuilderTest {
@@ -39,7 +41,18 @@ class MultistepValidationBuilderTest {
                         .message("good!")
                         .andNoArguments());
 
-        assertThrows(RuntimeException.class, () -> validation2.validate(book));
+        var exception = assertThrows(RuntimeException.class, () -> validation2.validate(book));
+        assertEquals("good!", exception.getMessage());
+
+        var validation3 = Validation.<Book>builder()
+                .when(b -> b.year == 1967)
+                .then(ValidationError.using(RuntimeException::new)
+                        .message("good! {0} -> {1}")
+                        .andArguments(Book::getYear, Book::getAuthor));
+
+        exception = assertThrows(RuntimeException.class, () -> validation3.validate(book));
+        assertEquals(MessageFormat.format("good! {0} -> {1}",
+                book.getYear(), book.getAuthor()), exception.getMessage());
     }
 
     @Test

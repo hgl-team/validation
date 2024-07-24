@@ -1,6 +1,7 @@
 package org.hglteam.validation;
 
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -43,11 +44,18 @@ public final class ValidationError extends IllegalArgumentException {
         }
 
         public <X> Function<X, T> andArguments(Object... args) {
-            return andArguments(x -> args);
+            return x -> create(message, args);
         }
 
         public <X> Function<X, T> andArguments(Function<X, Object[]> argumentExtractor) {
             return x -> create(message, argumentExtractor.apply(x));
+        }
+
+        @SafeVarargs
+        public final <X> Function<X, T> andArguments(Function<X, Object>... argumentExtractors) {
+            return x -> create(message, Arrays.stream(argumentExtractors)
+                    .map(f -> f.apply(x))
+                    .toArray());
         }
 
         private T create(String message, Object[] args) {

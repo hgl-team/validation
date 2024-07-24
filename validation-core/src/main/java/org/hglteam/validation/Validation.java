@@ -9,6 +9,10 @@ public interface Validation<T> {
         return target;
     }
 
+    default Validation<T> then(Validation<T> next) {
+        return target -> next.validate(this.valid(target));
+    }
+
     static <T> MultistepValidationBuilder<T> builder() {
         return new MultistepValidationBuilder<>();
     }
